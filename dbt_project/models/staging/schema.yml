@@ -1,0 +1,48 @@
+version: 2
+
+models:
+  - name: stg_customers
+    description: "Clientes de raw.customers, sin transformaciones de negocio."
+    columns:
+      - name: customer_id
+        data_tests:
+          - unique
+          - not_null
+
+  - name: stg_products
+    description: "Catálogo de productos de raw.products."
+    columns:
+      - name: product_id
+        data_tests:
+          - unique
+          - not_null
+
+  - name: stg_orders
+    description: >
+      Eventos del ciclo de vida de cada orden, deduplicados sobre
+      (order_id, status, event_at) para eliminar reingestas duplicadas.
+      Sigue siendo un registro por evento, no por orden.
+    columns:
+      - name: order_id
+        data_tests:
+          - not_null
+      - name: status
+        data_tests:
+          - not_null
+          - accepted_values:
+              values: ['created', 'paid', 'shipped', 'delivered', 'cancelled', 'returned']
+
+  - name: stg_order_items
+    description: >
+      Líneas de cada orden, deduplicadas sobre (order_id, line_number)
+      quedándonos con la versión de _ingested_at más reciente.
+    columns:
+      - name: order_id
+        data_tests:
+          - not_null
+      - name: product_id
+        data_tests:
+          - not_null
+          - relationships:
+              to: ref('stg_products')
+              field: product_id

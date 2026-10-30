@@ -1,0 +1,12 @@
+version: 2
+
+sources:
+  - name: raw
+    database: ecommerce
+    schema: raw
+    description: "Datos tal como llegan de los sistemas operativos (customers, products, orders, order_items)."
+    tables:
+      - name: customers
+      - name: products
+      - name: orders
+      - name: order_items

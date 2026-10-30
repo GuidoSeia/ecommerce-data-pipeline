@@ -1,0 +1,44 @@
+version: 2
+
+models:
+  - name: dim_customers
+    description: "Un registro por cliente, con su estado de actividad y métricas básicas de compra."
+    columns:
+      - name: customer_id
+        data_tests:
+          - unique
+          - not_null
+
+  - name: fct_orders
+    description: >
+      Un registro por orden, con los timestamps de cada estado del ciclo
+      de vida y el estado actual (el más avanzado alcanzado).
+    columns:
+      - name: order_id
+        data_tests:
+          - unique
+          - not_null
+      - name: current_status
+        data_tests:
+          - not_null
+          - accepted_values:
+              values: ['created', 'paid', 'shipped', 'delivered', 'cancelled', 'returned']
+      - name: customer_id
+        data_tests:
+          - not_null
+          - relationships:
+              to: ref('dim_customers')
+              field: customer_id
+
+  - name: fct_order_items
+    description: "Una línea de producto por orden, con su categoría, revenue y el estado de la orden a la que pertenece."
+    columns:
+      - name: order_id
+        data_tests:
+          - not_null
+          - relationships:
+              to: ref('fct_orders')
+              field: order_id
+      - name: product_id
+        data_tests:
+          - not_null
